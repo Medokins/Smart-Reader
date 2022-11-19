@@ -23,5 +23,5 @@ class Model:
     def setup_rnn(self):
         pass
 
-    def setup_ctc():
+    def setup_ctc(self):
         pass
