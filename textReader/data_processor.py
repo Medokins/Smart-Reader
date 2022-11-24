@@ -4,7 +4,7 @@ from image_processor import plot
 from collections import namedtuple
 import time
 
-Sample = namedtuple('Sample', 'label, path')
+Sample = namedtuple('Sample', 'path, label')
 
 class DataProcessor:
     def __init__(self, train_test_split: np.double):
@@ -29,15 +29,16 @@ class DataProcessor:
                         f'{path[0]}-{path[1]}-{path[2]}-{path[3]}.png'
                     )
                     label = ''.join(line[8:])
-                    self.samples[i] = Sample(label, path)
+                    self.samples[i] = Sample(path, label)
                     i += 1
 
         self.train_set = self.samples[:int(len(self.samples) * self.train_test_split)]
-        self.test = self.samples[int(len(self.samples) * self.train_test_split):]
+        self.test_set = self.samples[int(len(self.samples) * self.train_test_split):]
 
 
 def main():
-    DataProcessor(.9)
+    x = DataProcessor(.9)
+    print(x.train_set)
 
 if __name__ == '__main__':
     main()
