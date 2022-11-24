@@ -1,27 +1,33 @@
 # model creation and training
 import tensorflow as tf
 import numpy as np
+from data_processor import  DataProcessor
 
 class Model:
-    def __init__(self):
-        self.input_imgs = tf.compat.v1.placeholder(tf.float32, shape=(None, None, None))
+    def __init__(self, data: DataProcessor):
+        self.data = data
+        self.setup_layers()
 
-        self.setup_cnn()
-        self.setup_rnn()
-        self.setup_ctc()
+    def setup_layers(self):
+        #this need to be changed so that x_train containts img array not image path
+        (self.x_train, self.y_train) = list(zip(*self.data.train_set))
+        (self.x_test, self.y_test) =  list(zip(*self.data.test_set))
 
-        self.batches_trained = 0
-        self.update_ops = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)
-        with tf.control_dependencies(self.update_ops):
-            self.optimizer = tf.compat.v1.train.AdamOptimizer().minimize(self.loss)
+        # self.x_train = tf.keras.utils.normalize(self.x_train, axis = 1)
+        # self.x_test = tf.keras.utils.normalize(self.x_test, axis = 1)
 
-        self.sess, self.saver = self.setup_tf()
+        # model = tf.keras.models.Sequential()
+        # model.add(tf.keras.layers.Flatten())
+        # model.add(tf.keras.layers.Dense(128, activation = tf.nn.relu))
+        # model.add(tf.keras.layers.Dense(128, activation = tf.nn.relu))
+        ## here i need to figure out what my output layer should be
+        # model.compile(optimizer='adam' , loss='sparse_categorical_crossentropy', metrics=["accuracy"])
+        # model.fit(x_train, y_train, epochs = 3)
+        # model.save('textReader.model')
 
-    def setup_cnn(self):
-        pass
+def main():
+    textReader = Model(DataProcessor(.9))
+    print(textReader.x_train[100], textReader.y_train[100])
 
-    def setup_rnn(self):
-        pass
-
-    def setup_ctc(self):
-        pass
+if __name__ == '__main__':
+    main()
