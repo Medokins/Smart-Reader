@@ -2,4 +2,4 @@
 
 Handwritten text reader that will be able to replicate equations and detect drawings.
 
-I'm currently working on choosing the right layers and overall design of neural network structure.
+My current plan is to develop algorithm to split words into seperate characters and than pass them to Model
