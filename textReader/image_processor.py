@@ -1,59 +1,37 @@
 import numpy as np
 import cv2
+import matplotlib.pyplot as plt
+import imutils
 from typing import Tuple
 
-BATCH = ['imgs']
-
 class ImageProcessor:
-    def __init__(self, image_arr: np.ndarray, image_size: Tuple[int, int], line_mode: bool = False) -> None:
+    def __init__(self, image_arr: np.ndarray) -> None:
         """
-        :param image_arr: np.ndarray of image
-        :param image_size: size to which the image will be scaled to
-        :param line_mode: wheter or not there are many characters in an image (True) or just one (False)
+        :param image_arr: grayscale np.ndarray of image
         :return: None
         """
         self.image = image_arr
-        self.image_size = image_size
-        self.line_mode = line_mode
+        self.preprocess_image()
 
-    def process_img(self) -> None:
+    def preprocess_image(self) -> None:
         """
-        Scales image to self.image_size, convert image values to be in range [-1, 1] and transposes it
-        :return None
+        cuts given word (from an image) into seperate characters images
         """
-        # there are damaged files in IAM dataset - use black image instead
-        if self.image is None:
-            self.image = np.zeros(self.image_size[::-1])
+        # Here I want to cut given word into seperate characters
+        blurred = cv2.GaussianBlur(self.image, (5, 5), 0)
+        _, self.image = cv2.threshold(blurred, 0, 255, cv2.THRESH_OTSU)
+        edged = cv2.Canny(blurred, 30, 150)
+        cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cnts = imutils.grab_contours(cnts)
+        print(cnts[0])
+        #cnts = sort_contours(cnts, method="left-to-right")[0]
 
-        # image scaling
-        self.image = self.image.astype(np.float)
-        
-        wt, ht = self.image_size
-        h, w = self.image.shape
-        f = np.minimum(wt / w, ht / h)
-        tx = (wt - w * f) / 2
-        ty = (ht - h * f) / 2
+        cv2.imshow('test-img', self.image)
+        cv2.waitKey(0)
 
-        # scale image into target image
-        M = np.float32([[f, 0, tx], [0, f, ty]])
-        target = np.ones([ht, wt]) * 255
-        self.image = cv2.warpAffine(self.image, M, dsize=(wt, ht), dst = target, borderMode = cv2.BORDER_TRANSPARENT)
+def main():
+    path = 'data/img/a02/a02-000/a02-000-00-05.png'
+    ImageProcessor(cv2.imread(path, cv2.IMREAD_GRAYSCALE))
 
-        # transpose for Tensor Flow
-        self.image = cv2.transpose(self.image)
-
-        # convert to range [-1, 1]
-        self.image /= np.max(np.abs(self.image), axis=0)
-
-
-def plot(path):
-    import matplotlib.pyplot as plt
-
-    img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-    img_scaled = ImageProcessor(img, (256, 64))
-    img_scaled.process_img()
-
-    _, axarr = plt.subplots(1, 2)
-    axarr[0].imshow(img, cmap='gray')
-    axarr[1].imshow(np.transpose(img_scaled.image), cmap='gray')
-    plt.show()
+if __name__ == '__main__':
+    main()
