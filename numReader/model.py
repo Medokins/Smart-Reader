@@ -1,20 +1,6 @@
-from PIL import Image
 import numpy as np
 import tensorflow as tf
-
-def imageConverter(name):
-    # binarization with very high threshold
-    im = Image.open(f'handwrittenNumbers/{name}.png')
-    convertedImage = np.zeros((1, 28, 28))
-
-    for x in range(28):
-        for y in range(28):
-            if(im.getpixel((x,y)) == (255,255,255)):
-                convertedImage[0][y][x] = 0.0
-            else:
-                convertedImage[0][y][x] = 1.0
-
-    return convertedImage
+from data_preprocessor import preprocessImage
 
 def trainNumReader():
     mnist = tf.keras.datasets.mnist #28x28 images
@@ -34,7 +20,7 @@ def trainNumReader():
     model.save('numReader.model')
 
 def readDigit(name):
-    convertedImage = imageConverter(name)
+    convertedImage = preprocessImage(name)
     new_model = tf.keras.models.load_model('numReader.model')
     predictions = new_model.predict([convertedImage])
     print(np.argmax(predictions[0]))
