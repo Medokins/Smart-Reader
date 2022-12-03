@@ -71,7 +71,7 @@ def getBoundingBoxes(name: str, visualize: bool = False) -> np.ndarray:
 
 
 if __name__ == '__main__':
-    name = '7'
+    name = 'test'
     im = cv2.imread(f'handwrittenNumbers/{name}.png', cv2.IMREAD_GRAYSCALE)
     boundingBoxes = getBoundingBoxes(name, visualize=False)
 
@@ -79,20 +79,14 @@ if __name__ == '__main__':
     sortedBoundigBoxes = boundingBoxes[boundingBoxes[:,0].argsort()]
 
     # single_digit = im[y_start:y_end, x_start:x_end]
-    index = 0
+    index = 5
     single_digit = im[sortedBoundigBoxes[index][1]:sortedBoundigBoxes[index][3],
                       sortedBoundigBoxes[index][0]:sortedBoundigBoxes[index][2]]
 
     boundingBoxConverted = preprocessImage(single_digit)
     
-    # # for testing
-
-    # import pandas as pd
-    # pd.DataFrame(cv2.resize(single_digit, (28, 28))).to_csv('before.csv')
-    # pd.DataFrame(boundingBoxConverted[0]).to_csv('after.csv')
 
     import tensorflow as tf
-
     new_model = tf.keras.models.load_model('numReader.model')
 
     im = cv2.imread(f'handwrittenNumbers/{name}.png', cv2.IMREAD_GRAYSCALE)
@@ -103,7 +97,7 @@ if __name__ == '__main__':
     predictions = new_model.predict([boundingBoxConverted])
     print('BoundingBox image preprocessed', np.argmax(predictions[0]))
 
-    cv2.imshow('original', convertedImage[0])
+    cv2.imshow('original', cv2.resize(convertedImage[0], (256, 256), interpolation=cv2.INTER_NEAREST))
     cv2.waitKey(0)
-    cv2.imshow('after bounding box', boundingBoxConverted[0])
+    cv2.imshow('after bounding box', cv2.resize(boundingBoxConverted[0], (256, 256), interpolation=cv2.INTER_NEAREST))
     cv2.waitKey(0)
