@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import tensorflow as tf
 from settings import *
 
 def preprocessImage(imageArray: np.ndarray) -> np.ndarray:
@@ -69,35 +70,18 @@ def getBoundingBoxes(name: str, visualize: bool = False) -> np.ndarray:
     
     return coordinates_array
 
-
-if __name__ == '__main__':
-    name = 'test'
+def readDigits(coordinates_array: np.ndarray, name: str):
+    model = tf.keras.models.load_model('numReader.model')
     im = cv2.imread(f'handwrittenNumbers/{name}.png', cv2.IMREAD_GRAYSCALE)
-    boundingBoxes = getBoundingBoxes(name, visualize=False)
+    sortedBoundigBoxes = coordinates_array[coordinates_array[:,0].argsort()]
 
-    # sort bounding boxes in order from left to right
-    sortedBoundigBoxes = boundingBoxes[boundingBoxes[:,0].argsort()]
+    nums = []
 
-    # single_digit = im[y_start:y_end, x_start:x_end]
-    index = 5
-    single_digit = im[sortedBoundigBoxes[index][1]:sortedBoundigBoxes[index][3],
-                      sortedBoundigBoxes[index][0]:sortedBoundigBoxes[index][2]]
-
-    boundingBoxConverted = preprocessImage(single_digit)
+    for index in range(len(sortedBoundigBoxes)):
+        single_digit = im[sortedBoundigBoxes[index][1]:sortedBoundigBoxes[index][3],
+                          sortedBoundigBoxes[index][0]:sortedBoundigBoxes[index][2]]
+        boundingBoxConverted = preprocessImage(single_digit)
+        nums.append(np.argmax(model.predict([boundingBoxConverted])))
     
-
-    import tensorflow as tf
-    new_model = tf.keras.models.load_model('numReader.model')
-
-    im = cv2.imread(f'handwrittenNumbers/{name}.png', cv2.IMREAD_GRAYSCALE)
-    convertedImage = preprocessImage(im)
-    predictions = new_model.predict([convertedImage])
-    print('Original image preprocessed', np.argmax(predictions[0]))
-
-    predictions = new_model.predict([boundingBoxConverted])
-    print('BoundingBox image preprocessed', np.argmax(predictions[0]))
-
-    cv2.imshow('original', cv2.resize(convertedImage[0], (256, 256), interpolation=cv2.INTER_NEAREST))
-    cv2.waitKey(0)
-    cv2.imshow('after bounding box', cv2.resize(boundingBoxConverted[0], (256, 256), interpolation=cv2.INTER_NEAREST))
-    cv2.waitKey(0)
+    for number in nums:
+        print(number, end='')
