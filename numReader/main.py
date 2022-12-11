@@ -1,5 +1,6 @@
 from data_preprocessor import getBoundingBoxes, readDigits
 import cv2
+import PySimpleGUI as sg
 
 if __name__ == '__main__':
     name = 'test'
