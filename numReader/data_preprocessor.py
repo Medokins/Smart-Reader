@@ -28,7 +28,7 @@ def getBoundingBoxes(name: str, visualize: bool = False, img: np.ndarray = None)
     if img.all() != None:
         im = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     else:
-        im = cv2.imread(f'handwrittenNumbers/{name}.png', cv2.IMREAD_GRAYSCALE)
+        im = cv2.imread(f'../handwrittenNumbers/{name}.png', cv2.IMREAD_GRAYSCALE)
     im = ~im
     binaryIm = cv2.adaptiveThreshold(im, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, -1)
 
@@ -50,7 +50,7 @@ def getBoundingBoxes(name: str, visualize: bool = False, img: np.ndarray = None)
         if hierarchy[0][i][3] == -1:
             contours_poly[i] = cv2.approxPolyDP(c, 3, True)
             # this is to filter out small artifacts
-            if cv2.boundingRect(contours_poly[i])[2] * cv2.boundingRect(contours_poly[i])[3] > 1000:
+            if cv2.boundingRect(contours_poly[i])[2] * cv2.boundingRect(contours_poly[i])[3] > 2000:
                 boundRect.append(cv2.boundingRect(contours_poly[i]))
 
     # Draw the bounding boxes on the binarized input image:
@@ -58,12 +58,13 @@ def getBoundingBoxes(name: str, visualize: bool = False, img: np.ndarray = None)
         if img.all() != None:
             imCopy = img
         else: 
-            imCopy = cv2.imread(f'handwrittenNumbers/{name}.png')
+            imCopy = cv2.imread(f'../handwrittenNumbers/{name}.png')
         for i in range(len(boundRect)):
             color = (0, 255, 0)
             cv2.rectangle(imCopy, (int(boundRect[i][0]), int(boundRect[i][1])), (int(boundRect[i][0] + boundRect[i][2]), int(boundRect[i][1] + boundRect[i][3])), color, 2)
         cv2.imshow('bounding boxes', imCopy)
-        if img.any == None:
+
+        if img.all() == None:
             cv2.waitKey(0)
 
     coordinates_array = np.empty((len(boundRect), 4), dtype=np.int16)
@@ -72,18 +73,21 @@ def getBoundingBoxes(name: str, visualize: bool = False, img: np.ndarray = None)
         # Get the start coordinates and size of bounding box
         x_start, y_start, width, height = boundRect[i]
 
-        coordinates_array[i][0] = x_start - 3
-        coordinates_array[i][1] = y_start - 2
-        coordinates_array[i][2] = x_start + width + 3
-        coordinates_array[i][3] = y_start + height + 3
+        coordinates_array[i][0] = x_start
+        coordinates_array[i][1] = y_start
+        coordinates_array[i][2] = x_start + width 
+        coordinates_array[i][3] = y_start + height
     
     return coordinates_array
 
-def readDigits(coordinates_array: np.ndarray, name: str):
+def readDigits(coordinates_array: np.ndarray, name: str, img: np.ndarray = None):
     model = tf.keras.models.load_model('numReader.model')
-    im = cv2.imread(f'handwrittenNumbers/{name}.png', cv2.IMREAD_GRAYSCALE)
-    sortedBoundigBoxes = coordinates_array[coordinates_array[:,0].argsort()]
+    if img.all() != None:
+        im = img
+    else:
+        im = cv2.imread(f'../handwrittenNumbers/{name}.png', cv2.IMREAD_GRAYSCALE)
 
+    sortedBoundigBoxes = coordinates_array[coordinates_array[:,0].argsort()]
     nums = []
 
     for index in range(len(sortedBoundigBoxes)):
@@ -93,4 +97,4 @@ def readDigits(coordinates_array: np.ndarray, name: str):
         nums.append(np.argmax(model.predict([boundingBoxConverted])))
     
     for number in nums:
-        print(number, end='')
+        print(number, end=' ')
