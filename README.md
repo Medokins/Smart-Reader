@@ -8,4 +8,3 @@ seperated into individual characters to it.<br>
 
 I'll be using numReader for my Univeristy project so it'll be a seperate project and after that I'll merge digits and handwritings<br>
 datasets and create full text/number/equations recogintion model. (because of that it's run from numReader directory, so the paths will not match yet)
-test
