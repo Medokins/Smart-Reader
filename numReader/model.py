@@ -42,7 +42,7 @@ def trainNumReader():
         fill_mode = "nearest")
 
     # training
-    model.compile(optimizer='adam' , loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     model.fit(
         aug.flow(trainX, trainY, batch_size = BATCH_SIZE),
         validation_data = (testX, testY),
