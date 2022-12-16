@@ -52,4 +52,4 @@ def trainNumReader():
     # evaluation
     val_loss, val_acc = model.evaluate(testX, testY)
     print(val_loss, val_acc)
-    model.save('newModel.model')
+    model.save('numReader.model')
