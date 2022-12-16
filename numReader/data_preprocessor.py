@@ -20,15 +20,13 @@ def preprocessImage(imageArray: np.ndarray) -> np.ndarray:
     tf_image[0] = final_image
     return tf_image
 
-def getBoundingBoxes(name: str, visualize: bool = False, img: np.ndarray = None) -> np.ndarray:
+def getBoundingBoxes(img: np.ndarray, visualize: bool = False) -> np.ndarray:
     """
     :param string name: name of file (with 2 or more digits numbers) in handwrittenNumbers directory
     :return np.ndarray: coordinates of bounding boxes -> [[x_start, y_start, x_end, y_end], [], ...]
     """
-    if img.all() != None:
-        im = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    else:
-        im = cv2.imread(f'../handwrittenNumbers/{name}.png', cv2.IMREAD_GRAYSCALE)
+    im = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    
     im = ~im
     binaryIm = cv2.adaptiveThreshold(im, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, -1)
 
@@ -55,17 +53,11 @@ def getBoundingBoxes(name: str, visualize: bool = False, img: np.ndarray = None)
 
     # Draw the bounding boxes on the binarized input image:
     if visualize:
-        if img.all() != None:
-            imCopy = img
-        else: 
-            imCopy = cv2.imread(f'../handwrittenNumbers/{name}.png')
+        imCopy = img.copy()
         for i in range(len(boundRect)):
             color = (0, 255, 0)
             cv2.rectangle(imCopy, (int(boundRect[i][0]), int(boundRect[i][1])), (int(boundRect[i][0] + boundRect[i][2]), int(boundRect[i][1] + boundRect[i][3])), color, 2)
         cv2.imshow('bounding boxes', imCopy)
-
-        if img.all() == None:
-            cv2.waitKey(0)
 
     coordinates_array = np.empty((len(boundRect), 4), dtype=np.int16)
 
@@ -80,12 +72,9 @@ def getBoundingBoxes(name: str, visualize: bool = False, img: np.ndarray = None)
     
     return coordinates_array
 
-def readDigits(coordinates_array: np.ndarray, name: str, img: np.ndarray = None):
+def readDigits(coordinates_array: np.ndarray, img: np.ndarray):
     model = tf.keras.models.load_model('numReader.model')
-    if img.all() != None:
-        im = img
-    else:
-        im = cv2.imread(f'../handwrittenNumbers/{name}.png', cv2.IMREAD_GRAYSCALE)
+    im = img
 
     sortedBoundigBoxes = coordinates_array[coordinates_array[:,0].argsort()]
     nums = []
