@@ -26,8 +26,9 @@ def create_gui():
 
         if event == "Submit":
             name = 'test'
-            coordinates_array = getBoundingBoxes(name, visualize=True)
-            readDigits(coordinates_array, name)
+            img = cv2.imread(f'../handwrittenNumbers/{name}.png')
+            coordinates_array = getBoundingBoxes(img)
+            readDigits(coordinates_array, img)
             break
 
         if event == "Live View":
@@ -40,15 +41,15 @@ def create_gui():
         while True:
             _, frame = vid.read()
             last_frame = frame.copy()
-            getBoundingBoxes('CamerView', visualize=True, img=frame)
+            getBoundingBoxes(img = frame, visualize=True)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
                 
         vid.release()
         cv2.destroyAllWindows()
-        coordinates_array = getBoundingBoxes('Last Frame', visualize=False, img=last_frame)
+        coordinates_array = getBoundingBoxes(img=last_frame, visualize=False)
         last_frame_gray = cv2.cvtColor(last_frame, cv2.COLOR_BGR2GRAY)
-        readDigits(coordinates_array, name=None, img=last_frame_gray)
+        readDigits(coordinates_array, img=last_frame_gray)
 
 if __name__ == '__main__':
     create_gui()
