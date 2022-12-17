@@ -25,7 +25,7 @@ def create_gui():
             break
 
         if event == "Submit":
-            name = 'test'
+            name = '8'
             img = cv2.imread(f'../handwrittenNumbers/{name}.png')
             coordinates_array = getBoundingBoxes(img)
             readDigits(coordinates_array, img)
@@ -41,7 +41,7 @@ def create_gui():
         while True:
             _, frame = vid.read()
             last_frame = frame.copy()
-            getBoundingBoxes(img = frame, visualize=True)
+            getBoundingBoxes(img = frame, visualize=True, live_view=True)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
                 
