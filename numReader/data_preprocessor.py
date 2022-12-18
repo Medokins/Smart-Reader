@@ -22,7 +22,7 @@ def preprocessImage(imageArray: np.ndarray) -> np.ndarray:
 
 def getBoundingBoxes(img: np.ndarray, visualize: bool = False, live_view: bool = False) -> np.ndarray:
     """
-    :param string name: name of file (with 2 or more digits numbers) in handwrittenNumbers directory
+    :param np.ndarray img: input image
     :return np.ndarray: coordinates of bounding boxes -> [[x_start, y_start, x_end, y_end], [], ...]
     """
     im = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
