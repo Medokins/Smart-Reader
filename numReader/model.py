@@ -23,7 +23,7 @@ def trainNumReader():
     (trainX, testX, trainY, testY) = train_test_split(digits_data, digits_labels, test_size=.2, random_state=42)
 
     model = tf.keras.models.Sequential()
-    # takes our 28x28 and makes it 1x784
+    # takes 28x28 image and makes it 1x784
     model.add(tf.keras.layers.Flatten())
     # fully-connected layer, 128 units, relu activation
     model.add(tf.keras.layers.Dense(128, activation = tf.nn.relu))
