@@ -1,5 +1,6 @@
 from data_preprocessor import getBoundingBoxes, readDigits
 import cv2
+import numpy as np
 import PySimpleGUI as sg
 
 def create_gui():
@@ -9,9 +10,6 @@ def create_gui():
             [sg.Column([[sg.Button('Exit' )]], element_justification='right', expand_x=True)],
             [sg.Text("Choose a file: ", pad=(0,10)), sg.Input(), sg.FileBrowse(key="-IN-")],
             [sg.Button("Submit", pad=(0,10))], [sg.Button("Live View", pad=(0,10))],
-            [sg.Text("", key='-OUTPUT-', pad=(0,10))],
-            [sg.Text("Image:", key='-TXT-', size=(25, 2), pad=(0, 0), expand_x=True, expand_y=False, visible=False), sg.Text("Numbers:", key='-TXT2-', size=(25, 2), pad=(0, 0), expand_x=True, expand_y=False, visible=False)],
-            [sg.Image(key='-IMAGE-',  size=(256, 256), pad=(0,0), expand_x=False, expand_y=False), sg.Image(key='-IMAGE2-', size=(256, 256), pad=(0,0), expand_x=True, expand_y=False)]
             ]
 
     window = sg.Window('Reading numbers', layout, size=(800, 600), finalize=True)
@@ -25,8 +23,10 @@ def create_gui():
             break
 
         if event == "Submit":
-            name = '8'
-            img = cv2.imread(f'../handwrittenNumbers/{name}.png')
+            path = values["-IN-"]
+            img = cv2.imread(path)
+            cv2.imshow('tet', img)
+            cv2.waitKey(0)
             coordinates_array = getBoundingBoxes(img)
             readDigits(coordinates_array, img)
             break
@@ -44,12 +44,12 @@ def create_gui():
             getBoundingBoxes(img = frame, visualize=True, live_view=True)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
-                
+        
+        cv2.imwrite('last_frame.png', last_frame)
         vid.release()
         cv2.destroyAllWindows()
-        coordinates_array = getBoundingBoxes(img=last_frame, visualize=False)
-        last_frame_gray = cv2.cvtColor(last_frame, cv2.COLOR_BGR2GRAY)
-        readDigits(coordinates_array, img=last_frame_gray)
+        coordinates_array = getBoundingBoxes(img=cv2.imread('last_frame.png'), live_view=True)
+        readDigits(coordinates_array, img=last_frame)
 
 if __name__ == '__main__':
     create_gui()
