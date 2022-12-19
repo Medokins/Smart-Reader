@@ -1,23 +1,25 @@
 import cv2
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
 from settings import *
 
 def preprocessImage(imageArray: np.ndarray) -> np.ndarray:
     # filing border with white pixels untill it's a square to not distort image while resizing later
-    length = max(imageArray.shape[0:2])
+    length = max(imageArray.shape[0:2]) + 5
     squared_image = np.empty((length, length), np.uint8)
     squared_image.fill(255)
     ax,ay = (length - imageArray.shape[1]) // 2, (length - imageArray.shape[0])//2
     squared_image[ay:imageArray.shape[0] + ay, ax:ax + imageArray.shape[1]] = imageArray
 
-    final_image = cv2.resize(imageArray, (28, 28))
-    # I probably need to skeletonize/thinner image here
+    final_image = cv2.resize(squared_image, (28, 28))
     final_image[final_image != 255] = 1.0
     final_image[final_image == 255] = 0.0
 
     tf_image = np.empty((1, 28, 28), dtype=np.double)
     tf_image[0] = final_image
+    plt.imshow(tf_image[0], cmap = plt.cm.binary)
+    plt.show()
     return tf_image
 
 def getBoundingBoxes(img: np.ndarray, visualize: bool = False, live_view: bool = False) -> np.ndarray:
@@ -48,7 +50,8 @@ def getBoundingBoxes(img: np.ndarray, visualize: bool = False, live_view: bool =
         if hierarchy[0][i][3] == -1:
             contours_poly[i] = cv2.approxPolyDP(c, 3, True)
             # this is to filter out small artifacts
-            if cv2.boundingRect(contours_poly[i])[2] * cv2.boundingRect(contours_poly[i])[3] > 2000 and live_view:
+            area = cv2.boundingRect(contours_poly[i])[2] * cv2.boundingRect(contours_poly[i])[3] 
+            if area > 2000 and area < 10000 and live_view:
                 boundRect.append(cv2.boundingRect(contours_poly[i]))
             elif not live_view:
                 boundRect.append(cv2.boundingRect(contours_poly[i]))
@@ -80,10 +83,11 @@ def readDigits(coordinates_array: np.ndarray, img: np.ndarray):
 
     sortedBoundigBoxes = coordinates_array[coordinates_array[:,0].argsort()]
     nums = []
-
+    print(len(sortedBoundigBoxes))
     for index in range(len(sortedBoundigBoxes)):
         single_digit = im[sortedBoundigBoxes[index][1]:sortedBoundigBoxes[index][3],
                           sortedBoundigBoxes[index][0]:sortedBoundigBoxes[index][2]]
+
         boundingBoxConverted = preprocessImage(single_digit)
         nums.append(np.argmax(model.predict([boundingBoxConverted])))
     
