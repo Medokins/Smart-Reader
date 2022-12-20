@@ -45,10 +45,9 @@ def create_gui():
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
         
-        cv2.imwrite('last_frame.png', last_frame)
         vid.release()
         cv2.destroyAllWindows()
-        coordinates_array = getBoundingBoxes(img=cv2.imread('last_frame.png'), live_view=True)
+        coordinates_array = getBoundingBoxes(last_frame, live_view=True)
         readDigits(coordinates_array, img=last_frame)
 
 if __name__ == '__main__':
