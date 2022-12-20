@@ -4,6 +4,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from settings import *
 
+# this need to be rewritten bcs it distors images way to much
 def preprocessImage(imageArray: np.ndarray) -> np.ndarray:
     # filing border with white pixels untill it's a square to not distort image while resizing later
     length = max(imageArray.shape[0:2]) + 5
@@ -12,12 +13,13 @@ def preprocessImage(imageArray: np.ndarray) -> np.ndarray:
     ax,ay = (length - imageArray.shape[1]) // 2, (length - imageArray.shape[0])//2
     squared_image[ay:imageArray.shape[0] + ay, ax:ax + imageArray.shape[1]] = imageArray
 
-    final_image = cv2.resize(squared_image, (28, 28))
-    final_image[final_image != 255] = 1.0
-    final_image[final_image == 255] = 0.0
+    img = cv2.resize(squared_image, (28, 28))
+    _, blackAndWhiteImage = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
+    inverted = np.full(blackAndWhiteImage.shape,255) - blackAndWhiteImage
+    inverted = inverted.astype(np.uint8)
 
     tf_image = np.empty((1, 28, 28), dtype=np.double)
-    tf_image[0] = final_image
+    tf_image[0] = inverted
     plt.imshow(tf_image[0], cmap = plt.cm.binary)
     plt.show()
     return tf_image
@@ -83,11 +85,12 @@ def readDigits(coordinates_array: np.ndarray, img: np.ndarray):
 
     sortedBoundigBoxes = coordinates_array[coordinates_array[:,0].argsort()]
     nums = []
-    print(len(sortedBoundigBoxes))
     for index in range(len(sortedBoundigBoxes)):
         single_digit = im[sortedBoundigBoxes[index][1]:sortedBoundigBoxes[index][3],
                           sortedBoundigBoxes[index][0]:sortedBoundigBoxes[index][2]]
 
+        plt.imshow(single_digit, cmap = plt.cm.binary)
+        plt.show()
         boundingBoxConverted = preprocessImage(single_digit)
         nums.append(np.argmax(model.predict([boundingBoxConverted])))
     
